@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AR Quest – 2 Маркера</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js"></script>
+  <style>
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Стартовое меню */
+    #start-menu {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    
+    #start-menu h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .rules {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 500px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    
+    .rules h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+    }
+    
+    .rules ol {
+      text-align: left;
+      font-size: 1.1em;
+      line-height: 1.8;
+      padding-left: 20px;
+    }
+    
+    .rules li {
+      margin-bottom: 10px;
+    }
+    
+    #start-button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.3em;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    #start-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    #start-button:active {
+      transform: translateY(0);
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    /* Игровой оверлей */
+    #ui-overlay {
+      position: fixed;
+      top: 20px; left: 0; width: 100%;
+      text-align: center; color: white; z-index: 1000;
+      pointer-events: none;
+    }
+    
+    .message {
+      background: rgba(0,0,0,0.7);
+      padding: 12px 24px;
+      border-radius: 12px;
+      display: inline-block;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .message.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- СТАРТОВОЕ МЕНЮ -->
+  <div id="start-menu">
+    <!-- ========== МЕНЯЙТЕ ЗАГОЛОВОК ЗДЕСЬ ========== -->
+    <h1>🎮 AR Квест</h1>
+    
+    <div class="rules">
+      <h2>📋 Правила игры</h2>
+      <!-- ========== МЕНЯЙТЕ ПРАВИЛА ЗДЕСЬ ========== -->
+      <ol>
+        <li>Разрешите доступ к камере</li>
+        <li>Найдите маркер <strong>HIRO</strong> и наведите камеру</li>
+        <li>Кликните на <strong>синий куб</strong> 🟦</li>
+        <li>Найдите маркер <strong>KANJI</strong></li>
+        <li>Кликните на <strong>оранжевый шар</strong> 🟠</li>
+        <li>Завершите квест! 🎉</li>
+      </ol>
+    </div>
+    
+    <button id="start-button">🚀 Начать игру</button>
+  </div>
+
+  <!-- ИГРОВОЙ ОВЕРЛЕЙ -->
+  <div id="ui-overlay">
+    <div class="message" id="message"></div>
+  </div>
+
+  <!-- AR СЦЕНА -->
+  <a-scene
+    id="ar-scene"
+    embedded
+    arjs="sourceType: webcam; debugUIEnabled: false;"
+    vr-mode-ui="enabled: false"
+    style="display: block"
+    class="hidden"
+  >
+    <a-entity camera>
+      <a-cursor 
+        raycaster="objects: .clickable"
+        fuse="false"
+      ></a-cursor>
+    </a-entity>
+
+    <!-- ========================================== -->
+    <!-- МАРКЕР 1: Замените preset или используйте свой .patt файл -->
+    <!-- ========================================== -->
+    <!-- ВАРИАНТ А: Стандартный маркер HIRO -->
+    <a-marker preset="hiro">
+    
+    <!-- ВАРИАНТ Б: Свой маркер (раскомментируйте и укажите путь к .patt) -->
+    <!-- <a-marker type="pattern" url="markers/your-marker-1.patt"> -->
+    
+      <!-- ========== 3D ОБЪЕКТ 1: КУБ ========== -->
+      <!-- Чтобы заменить на свою 3D-модель (.glb/.gltf), замените <a-box> на: -->
+      <!-- <a-entity gltf-model="url(models/your-model.glb)" ...> -->
+      
+      <a-box
+        id="box1"
+        position="0 0.5 0"           <!-- Высота над маркером -->
+        color="#32b8c6"              <!-- Цвет куба -->
+        scale="0.8 0.8 0.8"          <!-- Размер куба -->
+        class="clickable"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"
+      >
+        <!-- ========== НАДПИСЬ НАД ОБЪЕКТОМ 1 ========== -->
+        <a-text
+          value="ЭТАП 1\nКликни!"   <!-- МЕНЯЙТЕ ТЕКСТ ЗДЕСЬ -->
+          position="0 1.2 0"         <!-- Позиция над кубом -->
+          scale="0.5 0.5 0.5"        <!-- Размер текста -->
+          color="white"              <!-- Цвет текста -->
+          align="center"
+        ></a-text>
+      </a-box>
+    </a-marker>
+
+    <!-- ========================================== -->
+    <!-- МАРКЕР 2: Замените preset или используйте свой .patt файл -->
+    <!-- ========================================== -->
+    <!-- ВАРИАНТ А: Стандартный маркер KANJI -->
+    <a-marker preset="kanji">
+    
+    <!-- ВАРИАНТ Б: Свой маркер (раскомментируйте и укажите путь к .patt) -->
+    <!-- <a-marker type="pattern" url="markers/your-marker-2.patt"> -->
+    
+      <!-- ========== 3D ОБЪЕКТ 2: ШАР ========== -->
+      <!-- Чтобы заменить на свою 3D-модель, замените <a-sphere> на: -->
+      <!-- <a-entity gltf-model="url(models/your-model-2.glb)" ...> -->
+      
+      <a-sphere
+        id="sphere2"
+        position="0 0.5 0"           <!-- Высота над маркером -->
+        radius="0.4"                 <!-- Радиус шара -->
+        color="#ff9800"              <!-- Цвет шара -->
+        class="clickable"
+        visible="false"              <!-- Скрыт до завершения этапа 1 -->
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"
+      >
+        <!-- ========== НАДПИСЬ НАД ОБЪЕКТОМ 2 ========== -->
+        <a-text
+          value="ЭТАП 2\nКликни!"   <!-- МЕНЯЙТЕ ТЕКСТ ЗДЕСЬ -->
+          position="0 1.2 0"
+          scale="0.5 0.5 0.5"
+          color="white"
+          align="center"
+        ></a-text>
+      </a-sphere>
+    </a-marker>
+  </a-scene>
+
+  <script>
+    let stage = 1;
+
+    // ========== МЕНЯЙТЕ ДЛИТЕЛЬНОСТЬ ПОКАЗА СООБЩЕНИЙ (миллисекунды) ========== //
+    function showMessage(text, duration = 2000) {  // duration - время в миллисекундах
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.classList.add('show');
+      setTimeout(() => msg.classList.remove('show'), duration);
+    }
+
+    // ЗАПУСК ИГРЫ
+    document.getElementById('start-button').addEventListener('click', () => {
+      document.getElementById('start-menu').classList.add('hidden');
+      document.getElementById('ar-scene').classList.remove('hidden');
+      
+      setTimeout(() => {
+        // ========== СООБЩЕНИЕ ПРИ СТАРТЕ (МЕНЯЙТЕ ТЕКСТ И ВРЕМЯ) ========== //
+        showMessage('Найди маркер HIRO и кликни на куб!', 3000);  // 3000 = 3 секунды
+      }, 500);
+    });
+
+    window.addEventListener('load', () => {
+      const box = document.getElementById('box1');
+      const sphere = document.getElementById('sphere2');
+
+      // ========== КЛИК НА ОБЪЕКТ 1 (КУБ) ========== //
+      box.addEventListener('click', () => {
+        if (stage === 1) {
+          box.setAttribute('visible', 'false');
+          
+          // ========== СООБЩЕНИЕ ПОСЛЕ КЛИКА НА ОБЪЕКТ 1 ========== //
+          showMessage('Отлично! Теперь найди маркер KANJI 🔍', 3000);  // МЕНЯЙТЕ ТЕКСТ И ВРЕМЯ
+          
+          sphere.setAttribute('visible', 'true');
+          stage = 2;
+        }
+      });
+
+      // ========== КЛИК НА ОБЪЕКТ 2 (ШАР) ========== //
+      sphere.addEventListener('click', () => {
+        if (stage === 2) {
+          sphere.setAttribute('visible', 'false');
+          
+          // ========== СООБЩЕНИЕ ПОСЛЕ КЛИКА НА ОБЪЕКТ 2 ========== //
+          showMessage('🎉 Поздравляю! Квест завершён!', 4000);  // МЕНЯЙТЕ ТЕКСТ И ВРЕМЯ
+          
+          stage = 3;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
